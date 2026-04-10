@@ -20,6 +20,12 @@
 | [tasks_06.md](./tasks_06.md) | 卡片 UI、默写区、释义展开 |
 | [tasks_07.md](./tasks_07.md) | 主窗口会话：门禁、下一张、收尾验收 |
 | [tasks_08.md](./tasks_08.md) | 阶段二（可选）：策略、统计、导出 |
+| [tasks_09.md](./tasks_09.md) | 外部词库：合规、`words` 扩展列、`external/` 约定 |
+| [tasks_10.md](./tasks_10.md) | **四级 CET-4**：转换器、CLI、夹具与测试 |
+| [tasks_11.md](./tasks_11.md) | **考研英语**：转换器、CLI、夹具与测试 |
+| [tasks_12.md](./tasks_12.md) | 应用侧：词书切换、`build_queue` 按标签过滤 |
+
+**词库扩展建议顺序**：`tasks_09` → `tasks_10` 与 `tasks_11`（可并行）→ `tasks_12`。
 
 ## 手工验收（MVP / tasks_07）
 
