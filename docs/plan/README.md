@@ -6,5 +6,6 @@
 |------|------|
 | [overview.md](./overview.md) | 目标、范围、交互流程、记忆算法与数据要点 |
 | [roadmap.md](./roadmap.md) | 分阶段里程碑与交付物 |
+| [srs.md](./srs.md) | 间隔复习（SM-2简化）规则 |
 
 可执行拆解见上级目录：[任务清单 `../tasks/README.md`](../tasks/README.md)。

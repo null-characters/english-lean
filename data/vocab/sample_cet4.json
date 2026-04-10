@@ -1,0 +1,153 @@
+[
+  {
+    "_comment": "CET-4 style sample; lemmas are normalized to lowercase on import."
+  },
+  {
+    "lemma": "abandon",
+    "phonetic": "ah-BAN-dun",
+    "definition_zh": "放弃；抛弃",
+    "example": "They had to abandon the sinking ship.",
+    "morphemes": "a- + bandon",
+    "synonyms": "desert, forsake",
+    "frequency_rank": 1
+  },
+  {
+    "lemma": "ability",
+    "phonetic": "ah-BI-li-tee",
+    "definition_zh": "能力；才能",
+    "example": "She has the ability to learn quickly.",
+    "morphemes": "able + -ity",
+    "synonyms": "capability, skill",
+    "frequency_rank": 2
+  },
+  {
+    "lemma": "abroad",
+    "phonetic": "ah-BRAWD",
+    "definition_zh": "在国外；到海外",
+    "example": "He studied abroad for two years.",
+    "morphemes": "a- + broad",
+    "synonyms": "overseas",
+    "frequency_rank": 3
+  },
+  {
+    "lemma": "absence",
+    "phonetic": "AB-sense",
+    "definition_zh": "缺席；缺乏",
+    "example": "In the absence of evidence, the case was closed.",
+    "synonyms": "lack, shortage",
+    "frequency_rank": 4
+  },
+  {
+    "lemma": "absolute",
+    "phonetic": "AB-suh-loot",
+    "definition_zh": "绝对的；完全的",
+    "example": "I have absolute confidence in the team.",
+    "synonyms": "complete, total",
+    "frequency_rank": 5
+  },
+  {
+    "lemma": "absorb",
+    "phonetic": "ub-ZORB",
+    "definition_zh": "吸收；使并入",
+    "example": "Plants absorb water through their roots.",
+    "frequency_rank": 6
+  },
+  {
+    "lemma": "abstract",
+    "phonetic": "AB-strakt",
+    "definition_zh": "抽象的；摘要",
+    "example": "The idea is too abstract for young children.",
+    "frequency_rank": 7
+  },
+  {
+    "lemma": "abundant",
+    "phonetic": "uh-BUN-dunt",
+    "definition_zh": "丰富的；大量的",
+    "example": "The region has abundant natural resources.",
+    "frequency_rank": 8
+  },
+  {
+    "lemma": "abuse",
+    "phonetic": "uh-BYOOSE",
+    "definition_zh": "滥用；虐待",
+    "frequency_rank": 9
+  },
+  {
+    "lemma": "academic",
+    "phonetic": "a-kuh-DEM-ik",
+    "definition_zh": "学术的；学院的",
+    "frequency_rank": 10
+  },
+  {
+    "lemma": "accept",
+    "phonetic": "ak-SEPT",
+    "definition_zh": "接受；认可",
+    "frequency_rank": 11
+  },
+  {
+    "lemma": "access",
+    "phonetic": "AK-sess",
+    "definition_zh": "通道；使用权",
+    "frequency_rank": 12
+  },
+  {
+    "lemma": "accident",
+    "phonetic": "AK-si-dent",
+    "definition_zh": "事故；意外",
+    "frequency_rank": 13
+  },
+  {
+    "lemma": "accommodate",
+    "phonetic": "uh-KAH-muh-date",
+    "definition_zh": "容纳；适应",
+    "frequency_rank": 14
+  },
+  {
+    "lemma": "accomplish",
+    "phonetic": "uh-KUM-plish",
+    "definition_zh": "完成；实现",
+    "frequency_rank": 15
+  },
+  {
+    "lemma": "account",
+    "phonetic": "uh-KOWNT",
+    "definition_zh": "账户；说明",
+    "frequency_rank": 16
+  },
+  {
+    "lemma": "accumulate",
+    "phonetic": "uh-KYOO-myuh-late",
+    "definition_zh": "积累；积聚",
+    "frequency_rank": 17
+  },
+  {
+    "lemma": "accurate",
+    "phonetic": "AK-yur-it",
+    "definition_zh": "准确的；精确的",
+    "frequency_rank": 18
+  },
+  {
+    "lemma": "accuse",
+    "phonetic": "uh-KYOOZ",
+    "definition_zh": "控告；指责",
+    "frequency_rank": 19
+  },
+  {
+    "lemma": "achieve",
+    "phonetic": "uh-CHEEV",
+    "definition_zh": "达到；完成",
+    "frequency_rank": 20
+  },
+  {
+    "lemma": "acquire",
+    "phonetic": "uh-KWIRE",
+    "definition_zh": "获得；取得",
+    "frequency_rank": 21
+  },
+  {
+    "lemma": "adapt",
+    "phonetic": "uh-DAPT",
+    "definition_zh": "适应；改编",
+    "frequency_rank": 22
+  }
+]
