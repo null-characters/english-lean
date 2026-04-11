@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import random
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -83,8 +84,8 @@ def test_build_queue_due_then_new(tmp_path: Path) -> None:
     new_only = list_new_words(conn, limit=10)
     assert new1 in new_only and new2 in new_only
 
-    q = build_queue(conn, now, due_limit=10, new_limit=2)
-    assert q[:2] == [ids[0], ids[1]]
+    q = build_queue(conn, now, due_limit=10, new_limit=2, rng=random.Random(0))
+    assert set(q[:2]) == {ids[0], ids[1]}
     assert set(q[2:]) == {new1, new2}
     assert len(q) == 4
 
@@ -140,8 +141,7 @@ def test_build_queue_due_words_always_before_new_regardless_of_word_id(tmp_path:
     )
     conn.commit()
 
-    q = build_queue(conn, now, due_limit=10, new_limit=5)
-    assert q[0] == due_late
+    q = build_queue(conn, now, due_limit=10, new_limit=5, rng=random.Random(0))
     assert new_early in q
     assert q.index(due_late) < q.index(new_early)
 

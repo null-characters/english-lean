@@ -20,6 +20,7 @@
 - [x] 新词每日上限（`study_meta` + `config/study_settings.py`）；复习优先策略（到期优先于新词；`build_queue` 已到期优先）
 - [x] 简单统计：连续天数、今日完成量、队列长度（状态栏 + `services/stats.py` + `study_meta` streak）
 - [x] 数据备份/导出（`~/Downloads/english_lean_progress_YYYYMMDD.csv`，见 tasks_08 T8.6）
+- [x] 学习队列：到期段、新词段各自内部按词根词缀聚类（`+` 前词干）并随机组序/组内序（`queue_cluster` + `build_queue`）
 
 ## 阶段 3：增强（按需）
 
@@ -29,4 +30,4 @@
 
 ---
 
-**当前焦点**：阶段 2（统计、每日新词上限等，见 `tasks_08.md`）。
+**当前焦点**：阶段 3 增强（主题与字体、更细筛选等）；阶段 2 已收尾。
