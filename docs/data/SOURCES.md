@@ -10,13 +10,48 @@
 
 | # | 名称 | 仓库/链接 | 许可（以仓库为准） | 备注 |
 |---|------|-----------|-------------------|------|
-| 1 | **ECDICT** | https://github.com/skywind3000/ECDICT | MIT License | 大型英汉词典数据库，含词频、释义等。包含四级词表（可按 `level` 字段筛选）。数据格式：SQLite / CSV。 |
+| 1 | **ECDICT** | https://github.com/skywind3000/ECDICT | MIT License | 大型英汉词典数据库，含词频、释义等。CSV 中 `tag` 字段为空格分隔标签，含 **cet4** 即为四级大纲词。数据格式：SQLite / CSV。 |
 | 2 | **CET-4 Word List (kylebing)** | https://github.com/kylebing/words | 无明确 LICENSE 文件 | 整理的四级/六级/考研词表，JSON 格式。**注意**：需联系作者确认许可或仅作参考。 |
 | 3 | **CET4-6 Vocabulary** | https://github.com/lyandut/CET4-6 | MIT License | 四级、六级词表整理，含音标、释义。格式：JSON / CSV。 |
 | 4 | **Exam Vocabulary** | https://github.com/issiki/english-word-lists | MIT License | 包含 CET-4、CET-6、考研等多种考试词汇，格式为 JSON。 |
 
 ### 推荐首选
 **ECDICT**（MIT 许可）— 数据全面、许可清晰，支持按等级筛选四级词汇。
+
+---
+
+## 四级 CET-4 — 已选方案（锁定）
+
+### 首选数据源（实现与 CLI 一致）
+**ECDICT（skywind3000）** — https://github.com/skywind3000/ECDICT
+
+- **许可证**：MIT License（以仓库 `LICENSE` 为准）
+- **格式**：`ecdict.csv`（UTF-8）
+- **抽取规则**：仅保留 `tag` 字段中含 **`cet4`** 的词条（标签为**空格分隔**，见上游 README「单词标注」）。
+- **字段映射**（导入 JSON）：
+  - `lemma` ← `word`（小写）
+  - `definition_zh` ← `translation`（无则回退 `definition`）
+  - `phonetic` ← `phonetic`
+  - `frequency_rank` ← `frq`（无效则 `bnc`）
+  - `source` ← 固定 `ecdict`
+  - `tags` ← `["cet4"]`
+
+### 获取方式（推荐）
+使用内置命令**流式下载**官方 CSV 并生成词包，无需手动下载大文件：
+
+```bash
+python -m english_lean.tools.import_cet4
+```
+
+输出默认：`data/vocab/generated/cet4_pack.json`（目录已 `.gitignore`，不纳入版本库）。
+
+### 备选
+- 自备 ECDICT 格式 `.csv`：`python -m english_lean.tools.import_cet4 --input /path/to/ecdict.csv`
+- lyandut 风格 `.json`（`word` / `translation` 等）：同上，`--input` 指向文件即可（`source` 为 `lyandut`）。
+
+### 分发策略
+- **仓库不提交**完整 `ecdict.csv`（体积大）；生成 JSON 亦默认忽略。
+- 详细步骤见 [`docs/data/cet4.md`](./cet4.md)。
 
 ---
 

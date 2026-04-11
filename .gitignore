@@ -15,3 +15,7 @@ build/
 # External vocabulary files (large data not tracked in Git)
 data/vocab/external/*
 !data/vocab/external/README.md
+
+# Generated vocabulary packs (may be large)
+data/vocab/generated/*.json
+!data/vocab/generated/README.md

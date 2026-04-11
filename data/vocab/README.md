@@ -8,9 +8,13 @@
 data/vocab/
 ├── README.md           # 本文件
 ├── sample_cet4.json    # 样例词库（小规模，纳入 Git）
-└── external/           # 外部大型词库（不纳入 Git）
+├── generated/          # 脚本生成的词包 JSON（默认不纳入 Git）
+│   └── README.md
+└── external/           # 用户自备的大型原始文件（不纳入 Git）
     └── README.md       # 外部词库使用说明
 ```
+
+四级词包推荐用 **`python -m english_lean.tools.import_cet4`** 自动生成至 `generated/cet4_pack.json`（见 `docs/data/cet4.md`）。
 
 ## 样例词库
 

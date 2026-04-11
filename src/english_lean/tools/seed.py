@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 from english_lean.db.connection import get_connection, init_db
@@ -17,10 +18,19 @@ def default_sample_path() -> Path:
     return _repo_root() / "data" / "vocab" / "sample_cet4.json"
 
 
-def main() -> None:
-    path = default_sample_path()
+def main(argv: list[str] | None = None) -> None:
+    p = argparse.ArgumentParser(description="将词库 JSON 导入本机用户数据目录下的 SQLite")
+    p.add_argument(
+        "vocab",
+        nargs="?",
+        type=Path,
+        default=None,
+        help="词库 JSON 路径（默认：仓库内样例 data/vocab/sample_cet4.json）",
+    )
+    args = p.parse_args(argv)
+    path = args.vocab.resolve() if args.vocab is not None else default_sample_path()
     if not path.is_file():
-        raise SystemExit(f"Missing sample vocabulary: {path}")
+        raise SystemExit(f"找不到词库文件：{path}")
 
     conn = get_connection()
     try:
