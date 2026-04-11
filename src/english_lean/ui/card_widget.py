@@ -16,12 +16,13 @@ class CardWidget(QWidget):
         example: str | None = None,
         morphemes: str | None = None,
         synonyms: str | None = None,
+        show_definition_default: bool = False,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self._def_label: QLabel
         self._toggle_btn: QPushButton
-        self._def_visible = False
+        self._def_visible = bool(show_definition_default)
 
         lemma_lbl = QLabel(lemma)
         f = QFont(lemma_lbl.font())
@@ -38,10 +39,10 @@ class CardWidget(QWidget):
             layout.addWidget(ph)
 
         self._def_label = QLabel(definition_zh or "")
-        self._def_label.setVisible(False)
+        self._def_label.setVisible(self._def_visible)
         layout.addWidget(self._def_label)
 
-        self._toggle_btn = QPushButton("显示释义")
+        self._toggle_btn = QPushButton("隐藏释义" if self._def_visible else "显示释义")
         self._toggle_btn.clicked.connect(self._toggle_definition)
         layout.addWidget(self._toggle_btn)
 

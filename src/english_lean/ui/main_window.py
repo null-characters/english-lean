@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import sqlite3
-from datetime import datetime
+from datetime import date, datetime
 
 from PySide6.QtCore import QSettings
-from PySide6.QtGui import QCloseEvent
+from PySide6.QtGui import QAction, QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QStatusBar,
     QVBoxLayout,
     QWidget,
 )
@@ -21,7 +22,17 @@ from PySide6.QtWidgets import (
 from english_lean.config.study_scope import StudyScope, scope_to_tag
 from english_lean.db.import_vocab import import_words_from_json
 from english_lean.repository.progress import get_progress, update_progress_after_success
-from english_lean.repository.study_meta import increment_new_words_today
+from english_lean.repository.study_meta import (
+    get_streak_days,
+    increment_new_words_today,
+    record_streak_on_open,
+)
+from english_lean.services.stats import (
+    default_progress_export_path,
+    export_progress_csv,
+    review_count_on_local_day,
+    session_cards_remaining,
+)
 from english_lean.repository.words import get_word_by_id
 from english_lean.session.controller import StudySession
 from english_lean.srs.sm2 import SrsState, review_success
@@ -32,6 +43,7 @@ from english_lean.ui.dictation_widget import DictationWidget
 SETTINGS_ORG = "english-lean"
 SETTINGS_APP = "english-lean"
 SETTINGS_STUDY_SCOPE = "study_scope"
+SETTINGS_SHOW_DEFINITION_DEFAULT = "show_definition_default"
 
 # Combo order must match ``_SCOPE_ORDER`` indices.
 _SCOPE_ORDER: tuple[StudyScope, ...] = ("all", "cet4", "kaoyan")
@@ -65,6 +77,11 @@ class MainWindow(QMainWindow):
         self._conn = conn
         self._session = StudySession(conn)
 
+        record_streak_on_open(self._conn, date.today())
+        self._conn.commit()
+
+        self._build_menu()
+
         self._body = QVBoxLayout()
         root = QWidget()
         root.setLayout(self._body)
@@ -94,14 +111,63 @@ class MainWindow(QMainWindow):
         row.addWidget(self._next_btn)
         self._body.addLayout(row)
 
+        self._stats_bar_label = QLabel("")
+        sb = QStatusBar()
+        sb.addPermanentWidget(self._stats_bar_label, 1)
+        self.setStatusBar(sb)
+
+        next_shortcut = QShortcut(QKeySequence("Ctrl+N"), self)
+        next_shortcut.activated.connect(self._on_next)
+
         self._scope_combo.currentIndexChanged.connect(self._on_scope_changed)
         self._load_study_scope()
         self._session.start(datetime.now(), tag=scope_to_tag(self._current_scope()))
 
         self._render()
+        self._refresh_stats_bar()
 
     def _study_settings(self) -> QSettings:
         return QSettings(SETTINGS_ORG, SETTINGS_APP)
+
+    def _build_menu(self) -> None:
+        menu_file = self.menuBar().addMenu("文件")
+        act_export = QAction("导出学习记录…", self)
+        act_export.triggered.connect(self._export_progress)
+        menu_file.addAction(act_export)
+
+        menu_settings = self.menuBar().addMenu("设置")
+        self._act_def_default = QAction("默认显示中文释义", self)
+        self._act_def_default.setCheckable(True)
+        self._act_def_default.setChecked(self._show_definition_default())
+        self._act_def_default.toggled.connect(self._on_def_default_toggled)
+        menu_settings.addAction(self._act_def_default)
+
+    def _show_definition_default(self) -> bool:
+        v = self._study_settings().value(SETTINGS_SHOW_DEFINITION_DEFAULT, False)
+        if isinstance(v, str):
+            return v.lower() in ("1", "true", "yes")
+        return bool(v)
+
+    def _on_def_default_toggled(self, checked: bool) -> None:
+        self._study_settings().setValue(SETTINGS_SHOW_DEFINITION_DEFAULT, checked)
+
+    def _export_progress(self) -> None:
+        path = default_progress_export_path()
+        try:
+            export_progress_csv(self._conn, path)
+        except OSError as exc:
+            QMessageBox.warning(self, "导出失败", str(exc))
+            return
+        QMessageBox.information(self, "导出完成", f"已保存：\n{path}")
+
+    def _refresh_stats_bar(self) -> None:
+        d = date.today()
+        n = review_count_on_local_day(self._conn, d)
+        streak = get_streak_days(self._conn)
+        rem = session_cards_remaining(len(self._session.queue), self._session.index)
+        self._stats_bar_label.setText(
+            f"今日已完成 {n} 次复习 · 本局队列剩余 {rem} 张 · 连续 {streak} 天"
+        )
 
     def _current_scope(self) -> StudyScope:
         i = self._scope_combo.currentIndex()
@@ -122,6 +188,7 @@ class MainWindow(QMainWindow):
         self._study_settings().setValue(SETTINGS_STUDY_SCOPE, scope)
         self._session.start(datetime.now(), tag=scope_to_tag(scope))
         self._render()
+        self._refresh_stats_bar()
 
     def _clear_card_area(self) -> None:
         while self._card_host.count():
@@ -147,11 +214,13 @@ class MainWindow(QMainWindow):
             else:
                 self._status.setText("今日完成。")
             self._next_btn.setEnabled(False)
+            self._refresh_stats_bar()
             return
 
         row = get_word_by_id(self._conn, wid)
         if row is None:
             self._status.setText("内部错误：找不到单词。")
+            self._refresh_stats_bar()
             return
 
         lemma = row["lemma"]
@@ -164,6 +233,7 @@ class MainWindow(QMainWindow):
             example=row["example"],
             morphemes=row["morphemes"],
             synonyms=row["synonyms"],
+            show_definition_default=self._show_definition_default(),
         )
         self._card_host.addWidget(card)
 
@@ -174,6 +244,7 @@ class MainWindow(QMainWindow):
         self._card_host.addWidget(d)
 
         self._next_btn.setEnabled(self._session.unlocked)
+        self._refresh_stats_bar()
 
     def _on_spelling_ok(self) -> None:
         if self._session.unlocked:
@@ -201,6 +272,7 @@ class MainWindow(QMainWindow):
         self._conn.commit()
         self._session.unlocked = True
         self._next_btn.setEnabled(True)
+        self._refresh_stats_bar()
 
     def _on_spelling_bad(self) -> None:
         self._session.unlocked = False
@@ -211,6 +283,7 @@ class MainWindow(QMainWindow):
             return
         self._session.advance()
         self._render()
+        self._refresh_stats_bar()
 
     def closeEvent(self, event: QCloseEvent) -> None:
         try:

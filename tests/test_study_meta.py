@@ -12,7 +12,9 @@ from english_lean.repository.study_meta import (
     effective_new_word_limit,
     ensure_day_boundary,
     get_new_words_today,
+    get_streak_days,
     increment_new_words_today,
+    record_streak_on_open,
 )
 
 
@@ -73,6 +75,26 @@ def test_increment_new_words_today(tmp_path: Path) -> None:
     increment_new_words_today(conn)
     conn.commit()
     assert get_new_words_today(conn) == 1
+    conn.close()
+
+
+def test_record_streak_consecutive_days(tmp_path: Path) -> None:
+    conn = get_connection(tmp_path / "streak.db")
+    init_db(conn)
+    d1 = date(2026, 3, 1)
+    d2 = date(2026, 3, 2)
+    assert record_streak_on_open(conn, d1) == 1
+    conn.commit()
+    assert get_streak_days(conn) == 1
+    assert record_streak_on_open(conn, d2) == 2
+    conn.commit()
+    assert get_streak_days(conn) == 2
+    assert record_streak_on_open(conn, d2) == 2
+    conn.commit()
+    d4 = date(2026, 3, 5)
+    assert record_streak_on_open(conn, d4) == 1
+    conn.commit()
+    assert get_streak_days(conn) == 1
     conn.close()
 
 

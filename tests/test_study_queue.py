@@ -124,6 +124,30 @@ def test_build_queue_filters_cet4_tag_only(tmp_path: Path) -> None:
     conn.close()
 
 
+def test_build_queue_due_words_always_before_new_regardless_of_word_id(tmp_path: Path) -> None:
+    """T8.3: every due card precedes any new card even when new rows have lower ``word_id``."""
+    conn = get_connection(tmp_path / "order.db")
+    init_db(conn)
+    new_early = _insert_word(conn, "new_low_id")
+    due_late = _insert_word(conn, "due_high_id")
+    conn.commit()
+    assert new_early < due_late
+
+    now = datetime(2026, 5, 1, 15, 0, 0)
+    conn.execute(
+        "UPDATE progress SET next_review_at = ? WHERE word_id = ?",
+        ((now - timedelta(hours=1)).isoformat(timespec="seconds"), due_late),
+    )
+    conn.commit()
+
+    q = build_queue(conn, now, due_limit=10, new_limit=5)
+    assert q[0] == due_late
+    assert new_early in q
+    assert q.index(due_late) < q.index(new_early)
+
+    conn.close()
+
+
 def test_build_queue_no_new_words_when_daily_quota_exhausted(tmp_path: Path) -> None:
     conn = get_connection(tmp_path / "quota.db")
     init_db(conn)

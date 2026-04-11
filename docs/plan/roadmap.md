@@ -18,8 +18,8 @@
 
 - [x] 词书切换：按 ``words.tags`` 过滤学习队列（四级 / 考研 / 全部），见 `tasks_12`
 - [x] 新词每日上限（`study_meta` + `config/study_settings.py`）；复习优先策略（到期优先于新词；`build_queue` 已到期优先）
-- [ ] 简单统计：连续天数、今日完成量、队列长度
-- [ ] 数据备份/导出（如复制 SQLite 文件说明或导出 CSV）
+- [x] 简单统计：连续天数、今日完成量、队列长度（状态栏 + `services/stats.py` + `study_meta` streak）
+- [x] 数据备份/导出（`~/Downloads/english_lean_progress_YYYYMMDD.csv`，见 tasks_08 T8.6）
 
 ## 阶段 3：增强（按需）
 
