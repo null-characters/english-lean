@@ -5,8 +5,10 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime
 
+from PySide6.QtCore import QSettings
 from PySide6.QtGui import QCloseEvent
 from PySide6.QtWidgets import (
+    QComboBox,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -16,6 +18,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from english_lean.config.study_scope import StudyScope, scope_to_tag
 from english_lean.db.import_vocab import import_words_from_json
 from english_lean.repository.progress import get_progress, update_progress_after_success
 from english_lean.repository.words import get_word_by_id
@@ -24,6 +27,13 @@ from english_lean.srs.sm2 import SrsState, review_success
 from english_lean.tools.seed import default_sample_path
 from english_lean.ui.card_widget import CardWidget
 from english_lean.ui.dictation_widget import DictationWidget
+
+SETTINGS_ORG = "english-lean"
+SETTINGS_APP = "english-lean"
+SETTINGS_STUDY_SCOPE = "study_scope"
+
+# Combo order must match ``_SCOPE_ORDER`` indices.
+_SCOPE_ORDER: tuple[StudyScope, ...] = ("all", "cet4", "kaoyan")
 
 
 def _progress_row_to_state(row: sqlite3.Row) -> SrsState:
@@ -59,6 +69,14 @@ class MainWindow(QMainWindow):
         root.setLayout(self._body)
         self.setCentralWidget(root)
 
+        scope_row = QHBoxLayout()
+        scope_row.addWidget(QLabel("词书："))
+        self._scope_combo = QComboBox()
+        self._scope_combo.addItems(["全部", "四级", "考研"])
+        scope_row.addWidget(self._scope_combo)
+        scope_row.addStretch(1)
+        self._body.addLayout(scope_row)
+
         self._status = QLabel("")
         self._body.addWidget(self._status)
 
@@ -75,7 +93,33 @@ class MainWindow(QMainWindow):
         row.addWidget(self._next_btn)
         self._body.addLayout(row)
 
-        self._session.start(datetime.now())
+        self._scope_combo.currentIndexChanged.connect(self._on_scope_changed)
+        self._load_study_scope()
+        self._session.start(datetime.now(), tag=scope_to_tag(self._current_scope()))
+
+        self._render()
+
+    def _study_settings(self) -> QSettings:
+        return QSettings(SETTINGS_ORG, SETTINGS_APP)
+
+    def _current_scope(self) -> StudyScope:
+        i = self._scope_combo.currentIndex()
+        if 0 <= i < len(_SCOPE_ORDER):
+            return _SCOPE_ORDER[i]
+        return "all"
+
+    def _load_study_scope(self) -> None:
+        raw = self._study_settings().value(SETTINGS_STUDY_SCOPE, "all")
+        scope = raw if raw in _SCOPE_ORDER else "all"
+        idx = _SCOPE_ORDER.index(scope)
+        self._scope_combo.blockSignals(True)
+        self._scope_combo.setCurrentIndex(idx)
+        self._scope_combo.blockSignals(False)
+
+    def _on_scope_changed(self) -> None:
+        scope = self._current_scope()
+        self._study_settings().setValue(SETTINGS_STUDY_SCOPE, scope)
+        self._session.start(datetime.now(), tag=scope_to_tag(scope))
         self._render()
 
     def _clear_card_area(self) -> None:
@@ -93,7 +137,12 @@ class MainWindow(QMainWindow):
         wid = self._session.current_word_id()
         if wid is None:
             if not self._session.queue:
-                self._status.setText("今日无任务（词库为空或队列已用尽）。")
+                if self._session.tag is not None:
+                    self._status.setText(
+                        "当前词书没有可用单词；请导入对应词包或切换为全部。"
+                    )
+                else:
+                    self._status.setText("今日无任务（词库为空或队列已用尽）。")
             else:
                 self._status.setText("今日完成。")
             self._next_btn.setEnabled(False)

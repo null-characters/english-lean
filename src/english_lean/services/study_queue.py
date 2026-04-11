@@ -14,17 +14,21 @@ def build_queue(
     *,
     due_limit: int = 50,
     new_limit: int = 20,
+    tag: str | None = None,
 ) -> list[int]:
     """
     Merge review queue for local time ``now``: due items first (earliest ``next_review_at``),
     then up to ``new_limit`` new words (never reviewed). Dedupes by ``word_id``.
     Repository functions do not commit; callers may ``commit`` after session updates.
 
+    ``tag`` (e.g. ``cet4``, ``kaoyan``) restricts to words whose ``words.tags`` contains
+    that tag; ``None`` includes all words.
+
     Returns an empty list when nothing is due and no new slots are available.
     """
-    due = list_due_before(conn, now, limit=due_limit)
+    due = list_due_before(conn, now, limit=due_limit, tag=tag)
     seen: set[int] = set(due)
-    fresh_pool = list_new_words(conn, limit=new_limit + len(due) + 50)
+    fresh_pool = list_new_words(conn, limit=new_limit + len(due) + 50, tag=tag)
     new_picked: list[int] = []
     for wid in fresh_pool:
         if wid in seen:

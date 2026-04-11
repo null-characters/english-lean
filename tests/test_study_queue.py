@@ -24,6 +24,22 @@ def _insert_word(conn: sqlite3.Connection, lemma: str) -> int:
     return wid
 
 
+def _insert_word_tagged(conn: sqlite3.Connection, lemma: str, tags_json: str) -> int:
+    cur = conn.execute(
+        "INSERT INTO words (lemma, tags) VALUES (?, ?)",
+        (lemma, tags_json),
+    )
+    wid = int(cur.lastrowid)
+    conn.execute(
+        """
+        INSERT INTO progress (word_id, ease_factor, interval_days, repetitions, lapses)
+        VALUES (?, 2.5, 0, 0, 0)
+        """,
+        (wid,),
+    )
+    return wid
+
+
 def test_build_queue_due_then_new(tmp_path: Path) -> None:
     conn = get_connection(tmp_path / "q.db")
     init_db(conn)
@@ -78,4 +94,27 @@ def test_build_queue_empty_when_no_words() -> None:
     init_db(conn)
     now = datetime(2026, 4, 10, 12, 0, 0)
     assert build_queue(conn, now, due_limit=10, new_limit=5) == []
+    conn.close()
+
+
+def test_build_queue_filters_cet4_tag_only(tmp_path: Path) -> None:
+    conn = get_connection(tmp_path / "tagged.db")
+    init_db(conn)
+    w_cet = _insert_word_tagged(conn, "cet_only", '["cet4"]')
+    w_ky = _insert_word_tagged(conn, "ky_only", '["kaoyan","netem"]')
+    conn.commit()
+
+    now = datetime(2026, 4, 10, 12, 0, 0)
+    all_ids = set(build_queue(conn, now, due_limit=10, new_limit=10))
+    assert all_ids == {w_cet, w_ky}
+
+    cet_only = build_queue(conn, now, due_limit=10, new_limit=10, tag="cet4")
+    assert cet_only == [w_cet]
+
+    ky_only = build_queue(conn, now, due_limit=10, new_limit=10, tag="kaoyan")
+    assert ky_only == [w_ky]
+
+    assert list_due_before(conn, now, limit=10, tag="cet4") == []
+    assert list_new_words(conn, limit=10, tag="cet4") == [w_cet]
+
     conn.close()

@@ -42,6 +42,47 @@ def test_init_db_idempotent_file(tmp_path: Path) -> None:
     conn2.close()
 
 
+def test_init_db_migrates_legacy_words_without_source_tags(tmp_path: Path) -> None:
+    """Older DBs created before ``source``/``tags`` must gain columns on init_db."""
+    db_path = tmp_path / "legacy.db"
+    raw = sqlite3.connect(db_path)
+    raw.executescript(
+        """
+        CREATE TABLE words (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lemma TEXT NOT NULL UNIQUE,
+            phonetic TEXT,
+            definition_zh TEXT,
+            example TEXT,
+            morphemes TEXT,
+            synonyms TEXT,
+            frequency_rank INTEGER
+        );
+        CREATE TABLE progress (
+            word_id INTEGER PRIMARY KEY REFERENCES words(id) ON DELETE CASCADE,
+            ease_factor REAL NOT NULL DEFAULT 2.5,
+            interval_days INTEGER NOT NULL DEFAULT 0,
+            repetitions INTEGER NOT NULL DEFAULT 0,
+            next_review_at TEXT,
+            last_reviewed_at TEXT,
+            lapses INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT
+        );
+        CREATE INDEX IF NOT EXISTS idx_progress_next ON progress(next_review_at);
+        CREATE INDEX IF NOT EXISTS idx_words_lemma ON words(lemma);
+        """
+    )
+    raw.commit()
+    raw.close()
+
+    conn = get_connection(db_path)
+    init_db(conn)
+    cols = _column_names(conn, "words")
+    assert "source" in cols
+    assert "tags" in cols
+    conn.close()
+
+
 def test_words_and_progress_columns(tmp_path: Path) -> None:
     conn = get_connection(tmp_path / "t.db")
     init_db(conn)

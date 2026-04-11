@@ -16,6 +16,8 @@ data/vocab/
 
 四级词包推荐用 **`python -m english_lean.tools.import_cet4`** 自动生成至 `generated/cet4_pack.json`（见 `docs/data/cet4.md`）。
 
+考研（NETEM）词包用 **`python -m english_lean.tools.import_kaoyan`** 生成至 `generated/kaoyan_pack.json`（见 `docs/data/kaoyan.md`）。
+
 ## 样例词库
 
 `sample_cet4.json` 是一个小规模样例，用于开发测试和应用首次启动时的自动导入。

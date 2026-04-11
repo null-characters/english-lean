@@ -14,9 +14,24 @@ class StudySession:
         self.queue: list[int] = []
         self.index: int = 0
         self.unlocked: bool = False
+        self.tag: str | None = None
 
-    def start(self, now: datetime, *, due_limit: int = 50, new_limit: int = 20) -> None:
-        self.queue = build_queue(self.conn, now, due_limit=due_limit, new_limit=new_limit)
+    def start(
+        self,
+        now: datetime,
+        *,
+        due_limit: int = 50,
+        new_limit: int = 20,
+        tag: str | None = None,
+    ) -> None:
+        self.tag = tag
+        self.queue = build_queue(
+            self.conn,
+            now,
+            due_limit=due_limit,
+            new_limit=new_limit,
+            tag=tag,
+        )
         self.index = 0
         self.unlocked = False
 

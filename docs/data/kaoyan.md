@@ -56,9 +56,9 @@
 
 ---
 
-## 一键生成词包（实现后）
+## 一键生成词包
 
-与四级对称，实现 **`python -m english_lean.tools.import_kaoyan`** 后（见 `tasks_11` T11.6），预期用法为：
+与四级对称，使用 **`python -m english_lean.tools.import_kaoyan`**：
 
 ```bash
 # 默认：从上游 Raw 拉取 netem_full_list.json，写出词包
@@ -73,8 +73,7 @@ python -m english_lean.tools.import_kaoyan --input data/vocab/external/netem_ful
 
 - **默认输出路径（约定）**：`data/vocab/generated/kaoyan_pack.json`（目录已 `.gitignore`，与 `cet4_pack.json` 相同策略）。
 - 生成目录说明见 [`data/vocab/generated/README.md`](../../data/vocab/generated/README.md)。
-
-在 CLI 尚未合并前，可先仅使用转换器 API 或本地脚本调用 `convert_kaoyan_to_pack`（T11.3）。
+- 亦可仅在代码中调用 `english_lean.vocab.convert_kaoyan.convert_kaoyan_to_pack`。
 
 ---
 

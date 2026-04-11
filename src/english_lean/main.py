@@ -2,8 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import sqlite3
 import sys
+
+# Before importing Qt: reduce noisy macOS logs (ICC color profile parsing is harmless).
+if sys.platform == "darwin":
+    os.environ.setdefault("QT_LOGGING_RULES", "qt.gui.icc=false")
 
 from PySide6.QtWidgets import QApplication, QMessageBox
 

@@ -161,6 +161,7 @@ python -m english_lean.tools.import_cet4
 
 - `source`：数据来源标识，如 `ecdict`、`netem`、`kylebing` 等
 - `tags`：标签数组，用于筛选，如 `["cet4"]`、`["kaoyan"]`、`["cet4", "kaoyan"]`
+- **应用内词书筛选**：SQLite 中 `tags` 存为 JSON 文本；学习队列按短标签名过滤时使用 `LIKE '%"cet4"%'` / `LIKE '%"kaoyan"%'` 等形式，与 `english_lean.config.study_scope` 一致（短名须与词包一致，避免随意改名）。
 
 ---
 
