@@ -28,6 +28,7 @@ def test_init_db_creates_tables_memory() -> None:
     }
     assert "words" in names
     assert "progress" in names
+    assert "study_meta" in names
 
 
 def test_init_db_idempotent_file(tmp_path: Path) -> None:

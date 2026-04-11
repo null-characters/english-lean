@@ -6,11 +6,13 @@
 
 - **目标**：可调参数集中。
 - **产出**：`NEW_WORDS_PER_DAY`、`DUE_LIMIT` 等常量或 `pydantic`/`toml` 读取（首版常量即可）。
+- **状态**：已实现 — `src/english_lean/config/study_settings.py`（`DUE_LIMIT`、`DEFAULT_NEW_WORD_LIMIT`、`NEW_WORDS_PER_DAY`）。
 
 ## T8.2 新词每日上限
 
 - **目标**：防一次塞太多新词。
 - **产出**：`progress` 或单独 `meta` 表记录 `last_study_date` 与 `new_words_today`；跨本地日历日重置（用 `date.today()`）。
+- **状态**：已实现 — `study_meta` 键值表、`repository/study_meta.py`；`StudySession.start` 用 `effective_new_word_limit`；首次复习成功时 `increment_new_words_today`。
 
 ## T8.3 复习优先于新词（强化）
 

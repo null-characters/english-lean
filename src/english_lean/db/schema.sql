@@ -27,3 +27,9 @@ CREATE TABLE IF NOT EXISTS progress (
 
 CREATE INDEX IF NOT EXISTS idx_progress_next ON progress(next_review_at);
 CREATE INDEX IF NOT EXISTS idx_words_lemma ON words(lemma);
+
+-- Daily new-word quota and future stats (key/value, tasks_08 T8.2+)
+CREATE TABLE IF NOT EXISTS study_meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);

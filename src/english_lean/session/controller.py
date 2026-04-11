@@ -5,6 +5,12 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime
 
+from english_lean.config.study_settings import (
+    DEFAULT_DUE_LIMIT,
+    DEFAULT_NEW_WORD_LIMIT,
+    NEW_WORDS_PER_DAY,
+)
+from english_lean.repository.study_meta import effective_new_word_limit
 from english_lean.services.study_queue import build_queue
 
 
@@ -20,16 +26,19 @@ class StudySession:
         self,
         now: datetime,
         *,
-        due_limit: int = 50,
-        new_limit: int = 20,
+        due_limit: int | None = None,
+        new_limit: int | None = None,
         tag: str | None = None,
     ) -> None:
         self.tag = tag
+        dl = DEFAULT_DUE_LIMIT if due_limit is None else due_limit
+        req = DEFAULT_NEW_WORD_LIMIT if new_limit is None else new_limit
+        cap = effective_new_word_limit(self.conn, req, NEW_WORDS_PER_DAY, now.date())
         self.queue = build_queue(
             self.conn,
             now,
-            due_limit=due_limit,
-            new_limit=new_limit,
+            due_limit=dl,
+            new_limit=cap,
             tag=tag,
         )
         self.index = 0

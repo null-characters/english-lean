@@ -6,8 +6,12 @@ import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from datetime import date
+
+from english_lean.config.study_settings import NEW_WORDS_PER_DAY
 from english_lean.db.connection import get_connection, init_db
 from english_lean.repository.progress import list_due_before, list_new_words
+from english_lean.repository.study_meta import ensure_day_boundary, effective_new_word_limit
 from english_lean.services.study_queue import build_queue
 
 
@@ -116,5 +120,36 @@ def test_build_queue_filters_cet4_tag_only(tmp_path: Path) -> None:
 
     assert list_due_before(conn, now, limit=10, tag="cet4") == []
     assert list_new_words(conn, limit=10, tag="cet4") == [w_cet]
+
+    conn.close()
+
+
+def test_build_queue_no_new_words_when_daily_quota_exhausted(tmp_path: Path) -> None:
+    conn = get_connection(tmp_path / "quota.db")
+    init_db(conn)
+    due_id = _insert_word(conn, "due_only")
+    new_id = _insert_word(conn, "new_blocked")
+    conn.commit()
+
+    now = datetime(2026, 4, 10, 12, 0, 0)
+    conn.execute(
+        "UPDATE progress SET next_review_at = ? WHERE word_id = ?",
+        (now.isoformat(timespec="seconds"), due_id),
+    )
+    conn.commit()
+
+    d = date(2026, 4, 10)
+    ensure_day_boundary(conn, d)
+    conn.execute(
+        "UPDATE study_meta SET value = ? WHERE key = 'new_words_today'",
+        (str(NEW_WORDS_PER_DAY),),
+    )
+    conn.commit()
+    cap = effective_new_word_limit(conn, 20, NEW_WORDS_PER_DAY, d)
+    assert cap == 0
+
+    q = build_queue(conn, now, due_limit=10, new_limit=cap)
+    assert q == [due_id]
+    assert new_id not in q
 
     conn.close()

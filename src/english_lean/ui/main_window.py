@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 from english_lean.config.study_scope import StudyScope, scope_to_tag
 from english_lean.db.import_vocab import import_words_from_json
 from english_lean.repository.progress import get_progress, update_progress_after_success
+from english_lean.repository.study_meta import increment_new_words_today
 from english_lean.repository.words import get_word_by_id
 from english_lean.session.controller import StudySession
 from english_lean.srs.sm2 import SrsState, review_success
@@ -184,6 +185,7 @@ class MainWindow(QMainWindow):
         if prow is None:
             QMessageBox.critical(self, "数据库错误", "找不到学习进度记录。")
             return
+        first_review = int(prow["repetitions"]) == 0 and prow["last_reviewed_at"] is None
         now = datetime.now()
         state = _progress_row_to_state(prow)
         new_state, next_at = review_success(state, now)
@@ -194,6 +196,8 @@ class MainWindow(QMainWindow):
             reviewed_at=now,
             next_review_at=next_at,
         )
+        if first_review:
+            increment_new_words_today(self._conn)
         self._conn.commit()
         self._session.unlocked = True
         self._next_btn.setEnabled(True)

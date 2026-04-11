@@ -5,6 +5,7 @@ from __future__ import annotations
 import sqlite3
 from datetime import datetime
 
+from english_lean.config.study_settings import DEFAULT_DUE_LIMIT, DEFAULT_NEW_WORD_LIMIT
 from english_lean.repository.progress import list_due_before, list_new_words
 
 
@@ -12,8 +13,8 @@ def build_queue(
     conn: sqlite3.Connection,
     now: datetime,
     *,
-    due_limit: int = 50,
-    new_limit: int = 20,
+    due_limit: int = DEFAULT_DUE_LIMIT,
+    new_limit: int = DEFAULT_NEW_WORD_LIMIT,
     tag: str | None = None,
 ) -> list[int]:
     """
@@ -27,6 +28,8 @@ def build_queue(
     Returns an empty list when nothing is due and no new slots are available.
     """
     due = list_due_before(conn, now, limit=due_limit, tag=tag)
+    if new_limit <= 0:
+        return due
     seen: set[int] = set(due)
     fresh_pool = list_new_words(conn, limit=new_limit + len(due) + 50, tag=tag)
     new_picked: list[int] = []
