@@ -63,9 +63,43 @@ python -m english_lean.tools.import_cet4
 | 2 | **考研英语词汇** | https://github.com/lyandut/CET4-6 | MIT License | 含考研词汇子集。格式：JSON / CSV。 |
 | 3 | **Kaoyan Vocabulary** | https://github.com/HuiDBK/kaoyan-english | 无 LICENSE 文件 | 考研英语核心词汇。**注意**：需确认许可。 |
 | 4 | **NETEM Word List** | https://github.com/dengxiyuan/NETEM-Words | 无 LICENSE 文件 | 考研英语（NETEM）词表。**注意**：需确认许可。 |
+| 5 | **NETEMVocabulary（exam-data）** | https://github.com/exam-data/NETEMVocabulary | **数据**：`LICENSE` 为 **CC BY-NC-SA 4.0**（以仓库为准）；**代码**：`LICENSE-CODE` 为 MIT | 官方风格 **5530** 考研词汇词频排序表，`netem_full_list.json` 约 700KB+。 |
 
-### 推荐首选
-**ECDICT**（MIT 许可）— 可通过 `level` 字段或词频排名筛选考研核心词汇，许可清晰。
+### 推荐首选（候选）
+上表为候选对比；**本项目考研词包（tasks_11）的实现与 CLI** 已锁定数据源，见下文 **「考研 — 已选方案」**（与仅用 ECDICT 筛选考研子集不是同一路径）。
+
+---
+
+## 考研英语 — 已选方案（锁定）
+
+### 首选数据源（实现与 `import_kaoyan` / `convert_kaoyan` 一致）
+**NETEMVocabulary（exam-data）** — https://github.com/exam-data/NETEMVocabulary
+
+- **许可证（以仓库文件为准，勿以本文档替代全文）**
+  - **词汇数据**（如 `netem_full_list.json`）：仓库根目录 **`LICENSE`** — **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International（CC BY-NC-SA 4.0）**。含 **非商业（NC）** 与 **相同方式共享（SA）** 等义务；发布、再分发或商用前须自行复核条款。
+  - **仓库内软件/脚本**：**`LICENSE-CODE`** — MIT License（与**数据**许可分离）。
+- **主文件**：`netem_full_list.json`（默认分支 `master`；体积约 **0.7MB+**，**不随本仓库分发**）。
+- **Raw 直链（便于本机下载核对）**：  
+  `https://raw.githubusercontent.com/exam-data/NETEMVocabulary/master/netem_full_list.json`
+- **JSON 顶层结构**：**单个 JSON 对象**，仅一个键（键名为中文表名，以仓库为准，形如 `5530考研词汇词频排序表`），值为 **对象数组**；**不是**顶层裸数组，也不是 `{"words": [...] }`。
+- **数组元素字段（以当前上游为准）**：`序号`、`词频`、`单词`、`释义`、`其他拼写`（可能为 `null`）。
+- **导入约定（与 `tasks_11` 实现一致）**
+  - `source` ← 固定 **`netem`**
+  - `tags` ← **`["kaoyan","netem"]`**（定稿见 [`docs/data/kaoyan.md`](./kaoyan.md)）
+  - `lemma` ← `单词`（规范化小写等见转换器）
+  - `definition_zh` ← `释义`
+  - `frequency_rank` ← 可用 `词频` 作排序辅助（或单独字段策略见 `kaoyan.md`）
+
+### 获取方式
+- **推荐**：使用后续提供的 `python -m english_lean.tools.import_kaoyan`（与四级对称：可 `--input` 本地文件或默认拉取上游 raw）。
+- **手动**：从上述仓库 Release/Raw 下载 `netem_full_list.json`，置于本机任意路径，导入时 `--input` 指向该文件。
+
+### 分发策略
+- **仓库不提交**完整 `netem_full_list.json` 或生成的 `kaoyan_pack.json`（体积与许可文件以用户本机下载为准）；生成目录仍遵循 `data/vocab/generated/` 的 `.gitignore` 约定。
+- 字段映射、抽检 SQL 与四级并存策略见 [`docs/data/kaoyan.md`](./kaoyan.md)（T11.2+）。
+
+### 备选（未锁定）
+- 若需 **MIT 数据许可** 的考研子集，可考虑自行从 **lyandut/CET4-6**、**ECDICT** 等上游抽取并单独约定 `source`/`tags`；**默认考研词包路径不以该备选为准**。
 
 ---
 
@@ -130,4 +164,4 @@ python -m english_lean.tools.import_cet4
 
 ---
 
-*最后更新：2026-04-10*
+*最后更新：2026-04-11*

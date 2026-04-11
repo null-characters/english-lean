@@ -32,8 +32,9 @@
 
 ```
 data/vocab/external/
-├── README.md           # 本文件
-├── ecdict_stems.csv    # ECDICT 词根词文件
-├── cet4_words.json     # 四级词表
-└── kaoyan_words.csv    # 考研词表
+├── README.md              # 本文件
+├── ecdict_stems.csv       # ECDICT 词根词文件
+├── cet4_words.json        # 四级词表
+├── netem_full_list.json   # 考研 NETEM 上游（exam-data/NETEMVocabulary）
+└── kaoyan_words.csv       # 其他考研表（示例）
 ```

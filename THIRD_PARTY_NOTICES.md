@@ -26,6 +26,13 @@ The following public vocabulary databases are planned for use in this project. E
 - **Description**: English word lists for various exams including CET-4, CET-6, and graduate entrance exams.
 - **Usage**: Reference for exam vocabulary organization.
 
+### NETEMVocabulary (exam-data)
+- **Repository**: https://github.com/exam-data/NETEMVocabulary
+- **License (data)**: CC BY-NC-SA 4.0 — see repository `LICENSE` (vocabulary files such as `netem_full_list.json`).
+- **License (code in that repository)**: MIT — see `LICENSE-CODE`.
+- **Description**: Frequency-sorted National Entrance Test of English for Masters (NETEM / 考研英语) word list (e.g. `netem_full_list.json`).
+- **Usage**: Planned primary source for **Kaoyan** import (`source`: `netem`, `tags`: `kaoyan` + `netem`; see `docs/data/kaoyan.md`). Users download data from upstream; this project does not redistribute the raw JSON. Compliance details: `docs/data/SOURCES.md` (section 考研 — 已选方案).
+
 ---
 
 ## Python Dependencies
@@ -54,4 +61,4 @@ This project uses the following Python packages. License information can be foun
 
 ---
 
-*Last updated: 2026-04-10*
+*Last updated: 2026-04-11*
