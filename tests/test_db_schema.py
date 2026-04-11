@@ -55,6 +55,8 @@ def test_words_and_progress_columns(tmp_path: Path) -> None:
         "morphemes",
         "synonyms",
         "frequency_rank",
+        "source",
+        "tags",
     }
     assert expected_words <= words_cols
     prog_cols = _column_names(conn, "progress")

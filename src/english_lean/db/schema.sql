@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS words (
     example TEXT,
     morphemes TEXT,
     synonyms TEXT,
-    frequency_rank INTEGER
+    frequency_rank INTEGER,
+    source TEXT,
+    tags TEXT
 );
 
 CREATE TABLE IF NOT EXISTS progress (

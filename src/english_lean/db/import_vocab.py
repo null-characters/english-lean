@@ -14,6 +14,28 @@ def normalize_lemma(raw: str) -> str | None:
     return s if s else None
 
 
+def _normalize_tags(tags: Any) -> str | None:
+    """
+    Normalize tags to a JSON array string.
+    Accepts: list, tuple, comma-separated string, or None.
+    Returns: JSON array string like '["cet4"]' or None.
+    """
+    if tags is None:
+        return None
+    if isinstance(tags, list | tuple):
+        # Filter to non-empty strings and convert to list
+        cleaned = [str(t).strip() for t in tags if t and str(t).strip()]
+        return json.dumps(cleaned) if cleaned else None
+    if isinstance(tags, str):
+        tags = tags.strip()
+        if not tags:
+            return None
+        # Treat as comma-separated
+        parts = [p.strip() for p in tags.split(",") if p.strip()]
+        return json.dumps(parts) if parts else None
+    return None
+
+
 def _iter_records(data: Any) -> list[dict[str, Any]]:
     if isinstance(data, list):
         return [x for x in data if isinstance(x, dict)]
@@ -47,6 +69,7 @@ def import_words_from_json(conn: sqlite3.Connection, path: Path) -> int:
     """
     Insert words from JSON (array of objects or { "words": [...] }).
     Skips entries without a non-empty lemma after normalization.
+    Supports optional 'source' and 'tags' fields.
     Returns number of newly inserted word rows (not progress rows).
     """
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -69,14 +92,27 @@ def import_words_from_json(conn: sqlite3.Connection, path: Path) -> int:
         morphemes = rec.get("morphemes")
         synonyms = rec.get("synonyms")
         frequency_rank = rec.get("frequency_rank")
+        source = rec.get("source")
+        tags = _normalize_tags(rec.get("tags"))
 
         conn.execute(
             """
             INSERT OR IGNORE INTO words (
-                lemma, phonetic, definition_zh, example, morphemes, synonyms, frequency_rank
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                lemma, phonetic, definition_zh, example, morphemes, synonyms,
+                frequency_rank, source, tags
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (lemma, phonetic, definition_zh, example, morphemes, synonyms, frequency_rank),
+            (
+                lemma,
+                phonetic,
+                definition_zh,
+                example,
+                morphemes,
+                synonyms,
+                frequency_rank,
+                source,
+                tags,
+            ),
         )
 
     conn.commit()
